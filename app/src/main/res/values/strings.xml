@@ -24,6 +24,7 @@
 
     <string name="navigation_drawer_open">打开侧边栏</string>
     <string name="navigation_drawer_close">关闭侧边栏</string>
+    <string name="reading_time_dialog_tile">阅读时长统计</string>
 
     <string name="local">本地</string>
     <string name="search">搜索</string>
@@ -439,4 +440,5 @@
     <string name="clear_find_cache">清空发现缓存</string>
     <string name="edit_find">编辑发现</string>
     <string name="change_icon_summary">切换软件显示在桌面的图标</string>
+    <string name="reading_time">阅读时间</string>
 </resources>

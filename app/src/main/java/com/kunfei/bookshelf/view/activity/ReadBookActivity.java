@@ -48,6 +48,7 @@ import com.kunfei.bookshelf.help.ReadBookControl;
 import com.kunfei.bookshelf.model.TxtChapterRuleManager;
 import com.kunfei.bookshelf.presenter.ReadBookPresenter;
 import com.kunfei.bookshelf.presenter.contract.ReadBookContract;
+import com.kunfei.bookshelf.readingtime.ReadingTimeUtil;
 import com.kunfei.bookshelf.service.ReadAloudService;
 import com.kunfei.bookshelf.utils.BatteryUtil;
 import com.kunfei.bookshelf.utils.NetworkUtils;
@@ -167,6 +168,7 @@ public class ReadBookActivity extends MBaseActivity<ReadBookContract.Presenter> 
         keepScreenRunnable = this::unKeepScreenOn;
         autoPageRunnable = this::nextPage;
         upHpbNextPage = this::upHpbNextPage;
+        ReadingTimeUtil.startReading();
     }
 
     @Override
@@ -1581,6 +1583,7 @@ public class ReadBookActivity extends MBaseActivity<ReadBookContract.Presenter> 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ReadingTimeUtil.stopReading(this);
         if (batInfoReceiver != null) {
             batInfoReceiver.unregisterThis();
         }

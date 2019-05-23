@@ -3,6 +3,12 @@
 
     <group android:id="@+id/drawer_menu_book_source">
         <item
+            android:id="@+id/show_reading_time"
+            android:icon="@drawable/ic_timer_black_24dp"
+            android:title="@string/reading_time"
+            app:tint="@color/tv_text_default" />
+
+        <item
             android:id="@+id/action_book_source_manage"
             android:icon="@drawable/ic_book_source_manage"
             android:title="@string/book_source_manage"
