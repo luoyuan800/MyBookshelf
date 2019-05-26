@@ -10,29 +10,48 @@ import java.util.Calendar;
 public class ReadingTimeUtil {
 
   private final static String READ_TIME_CONTENT =
-      "<strong>当周阅读时长</strong>： <font color=\"green\">%s</font>\n"
-          + "<br> \n"
-          + "    <small><i>上周阅读时长: %s</i></small>\n"
+      "<p>\n"
+          + " <font color=\"#87CEFA\">本周：%s</font>\n"
           + "<br>\n"
-          + "<hr>\n"
-          + "<strong>当月阅读时长</strong><font color=\"blue\"> %s</font>\n"
+          + "  &nbsp;&nbsp;<font color=\"#D3D3D3\" size=\"2\">上周：%s</font>\n"
           + "<br>\n"
-          + "<small><i>上月阅读时长：%s</i></small>\n"
+          + "</p>\n"
+          + " <font color=\"#90EE90\"> 当月：%s</font>\n"
           + "<br>\n"
-          + "<hr>\n"
-          + "<div align=\"right\">\n"
-          + "<strong>总阅读时长</strong>：<font color=\"red\">%s</font>\n"
-          + "  </div>";
+          + "  &nbsp;&nbsp;<font color=\"#D3D3D3\" size=\"2\">上月：%s</font>\n"
+          + "<br>\n"
+          + "<br>\n"
+          + "  <font color=\"#FFA07A\">总读书时间：%s</font>";
+  private static final String READING_TIME = "reading_time";
+  private static final String TOTAL_READING_TIME = "total_reading_time";
+  private static final String MONTH_READING_TIME_KEY = "month_reading_time_key";
+  private static final String WEEK_READING_TIME_KEY = "week_reading_time_key";
+  private static final String LAST_MONTH_READING_TIME = "last_month_reading_time";
+  private static final String LAST_WEEK_READING_TIME = "last_week_reading_time";
+  private static final int SECONDS_PER_MINUTE = 60;
+  private static final int SECONDS_PER_HOUR = 60 * 60;
+
   private static boolean startReading = false;
   private static long currentStarTime;
   private static String currentMonth;
+  private static String lastMonth;
   private static String currentWeek;
+  private static String lastWeek;
 
   static {
-    Calendar calendar = Calendar.getInstance();
-    currentMonth = calendar.get(Calendar.YEAR) + "/" + calendar.get(Calendar.MONTH);
-    currentWeek = calendar.get(Calendar.YEAR) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar
-        .get(Calendar.WEEK_OF_MONTH);
+    Calendar currentCalendar = Calendar.getInstance();
+    Calendar lastMonthCalendar = (Calendar) currentCalendar.clone();
+    lastMonthCalendar.add(Calendar.MONTH, -1);
+    Calendar lastWeekCalendar = (Calendar) currentCalendar.clone();
+    lastWeekCalendar.add(Calendar.WEEK_OF_MONTH, -1);
+    currentMonth = currentCalendar.get(Calendar.YEAR) + "/" + currentCalendar.get(Calendar.MONTH);
+    lastMonth = lastMonthCalendar.get(Calendar.YEAR) + "/" + lastMonthCalendar.get(Calendar.MONTH);
+    currentWeek =
+        currentCalendar.get(Calendar.YEAR) + "/" + currentCalendar.get(Calendar.MONTH) + "/"
+            + currentCalendar.get(Calendar.WEEK_OF_MONTH);
+    lastWeek =
+        lastWeekCalendar.get(Calendar.YEAR) + "/" + lastWeekCalendar.get(Calendar.MONTH) + "/"
+            + lastWeekCalendar.get(Calendar.WEEK_OF_MONTH);
   }
 
   public static void startReading() {
@@ -43,69 +62,49 @@ public class ReadingTimeUtil {
   public static void stopReading(Context context) {
     startReading = false;
     long readingTime = System.currentTimeMillis() - currentStarTime;
-    SharedPreferences pref = context.getSharedPreferences("reading_time", MODE_PRIVATE);
-    long priorTotal = pref.getLong("total_reading_time", 0);
-    long priorMonth = 0;
-    long priorWeek = 0;
-    long lastMonthReadingTime = 0;
-    String monthKey = pref.getString("month_reading_time_key", currentMonth);
-    if (!currentMonth.equalsIgnoreCase(monthKey)) {
-      lastMonthReadingTime = pref.getLong(monthKey, 0);
-    } else {
-      priorMonth = pref.getLong(monthKey, 0);
-    }
-    long lastWeekReadingTime = 0;
-    String weekKey = pref.getString("week_reading_time_key", currentWeek);
-    if (!currentWeek.equalsIgnoreCase(weekKey)) {
-      lastWeekReadingTime = pref.getLong(weekKey, 0);
-    } else {
-      priorWeek = pref.getLong(weekKey, 0);
-    }
-
-    if(priorTotal > 100000L * 60 * 60 * 1000){
-      priorMonth = 0;
-      priorTotal= 0;
-      priorWeek = 0;
-    }
+    SharedPreferences pref = context.getSharedPreferences(READING_TIME, MODE_PRIVATE);
+    long priorTotal = pref.getLong(TOTAL_READING_TIME, 0);
+    long priorMonth = pref.getLong(currentMonth, 0);
+    long priorWeek = pref.getLong(currentWeek, 0);
 
     Editor editor = pref.edit();
-    editor.putLong("total_reading_time", priorTotal + readingTime);
-    if (!currentMonth.equalsIgnoreCase(monthKey)) {
-      editor.putLong("last_month_reading_time", lastMonthReadingTime);
-      monthKey = currentMonth;
-      editor.putString("month_reading_time_key", monthKey);
-    }
-    editor.putLong(monthKey, priorMonth + readingTime);
-
-    if (!currentWeek.equalsIgnoreCase(weekKey)) {
-      editor.putLong("last_week_reading_time", lastWeekReadingTime);
-      weekKey = currentWeek;
-      editor.putString("week_reading_time_key", weekKey);
-    }
-    editor.putLong(weekKey, priorWeek + readingTime);
+    editor.putLong(TOTAL_READING_TIME, priorTotal + readingTime);
+    editor.putLong(currentMonth, priorMonth + readingTime);
+    editor.putLong(currentWeek, priorWeek + readingTime);
 
     editor.apply();
   }
 
   public static String getReadingTimeContent(Context context) {
-    SharedPreferences pref = context.getSharedPreferences("reading_time", MODE_PRIVATE);
+    SharedPreferences pref = context.getSharedPreferences(READING_TIME, MODE_PRIVATE);
     return String
         .format(READ_TIME_CONTENT,
             formatUnit(pref.getLong(currentWeek, 0)),
-            formatUnit(pref.getLong("last_week_reading_time", 0)),
+            formatUnit(pref.getLong(lastWeek, 0)),
             formatUnit(pref.getLong(currentMonth, 0)),
-            formatUnit(pref.getLong("last_month_reading_time", 0)),
-            formatUnit(pref.getLong("total_reading_time", 0)));
+            formatUnit(pref.getLong(lastMonth, 0)),
+            formatUnit(pref.getLong(TOTAL_READING_TIME, 0)));
   }
 
-  private static String formatUnit(long currentWeekReadingTime) {
-    if (currentWeekReadingTime < 60 * 1000 * 60) {
-      return currentWeekReadingTime / (1000 * 60) + "分钟";
-    } else {
-      long h = currentWeekReadingTime / (1000 * 60 * 60);
-      long m = currentWeekReadingTime % (1000 * 60 * 60);
-      return h + "小时: " + m + "分钟";
+  private static String formatUnit(long readingTime) {
+    long seconds = readingTime / 1000;
+    long hours = seconds / SECONDS_PER_HOUR;
+    int minutes = (int) ((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+    int secs = (int) (seconds % SECONDS_PER_MINUTE);
+    StringBuilder builder = new StringBuilder();
+    if (hours > 0) {
+      builder.append(hours).append("小时");
     }
+    if (minutes > 0) {
+      builder.append(minutes).append("分钟");
+    }
+    if (secs > 0) {
+      builder.append(secs).append("秒");
+    }
+    if (hours == 0 && minutes == 0 && secs == 0) {
+      builder.append("没有记录");
+    }
+    return builder.toString();
   }
 
 }

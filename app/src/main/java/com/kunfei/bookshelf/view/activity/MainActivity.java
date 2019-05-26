@@ -577,9 +577,9 @@ public class MainActivity extends BaseTabActivity<MainContract.Presenter> implem
         case R.id.action_about:
           handler.postDelayed(() -> AboutActivity.startThis(this), 200);
           break;
-        case R.id.action_donate:
+       /* case R.id.action_donate:
           handler.postDelayed(() -> DonateActivity.startThis(this), 200);
-          break;
+          break;*/
         case R.id.action_backup:
           handler.postDelayed(this::backup, 200);
           break;
@@ -696,7 +696,8 @@ public class MainActivity extends BaseTabActivity<MainContract.Presenter> implem
   @Override
   protected void firstRequest() {
     if (!isRecreate) {
-      versionUpRun();
+      //自己用的不用显示弹窗了
+      //versionUpRun();
     }
     if (!Objects.equals(MApplication.downloadPath, FileHelp.getFilesPath())) {
       requestPermission();
